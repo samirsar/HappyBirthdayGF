@@ -1,5 +1,6 @@
 // Shared playlist for every page — state continues via localStorage
 const PLAYLIST = [
+    { title: 'Isharey', src: 'music/Isharey - Atharva.mp3' },
     { title: 'Main Tera Ho Gaya', src: 'music/main-tera-ho-gaya.mp3' },
     { title: 'Jaane Tu', src: 'music/jaane-tu.mp3' },
     { title: 'Mera Pehla Pehla Pyaar', src: 'music/mera-pehla-pehla-pyaar.mp3' },
