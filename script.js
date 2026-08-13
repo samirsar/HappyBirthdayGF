@@ -265,8 +265,8 @@ function initMain() {
 document.addEventListener('DOMContentLoaded', () => {
     const now = new Date();
     const year = now.getFullYear();
-    // const birthdayThisYear = new Date(year, 7, 14, 0, 0, 0); // August is month 7
-    const birthdayThisYear = new Date(Date.now() + 60 * 100);
+    const birthdayThisYear = new Date(year, 7, 14, 0, 0, 0); // August is month 7
+    // const birthdayThisYear = new Date(Date.now() + 60 * 100);
     if (now < birthdayThisYear) {
         startCountdown(birthdayThisYear);
     } else {
