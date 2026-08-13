@@ -1,134 +1,51 @@
 const GIRL_NAME = 'Jenny';
 
-// ========== Playlist configuration ==========
-// Replace the sample entries below with your own tracks (urls or local paths)
-const PLAYLIST = [
-    // Example:
-    // { title: 'My Song', src: 'music/song1.mp3' },
-    { title: 'Main Tera Ho Gaya', src: 'music/Main Tera Ho Gaya Karneast (pagalall.com).mp3' },
-];
-
-// Playlist runtime state
-let playlistIndex = 0;
-const audio = new Audio();
-audio.preload = 'auto';
-audio.crossOrigin = 'anonymous';
-audio.loop = false;
-
-function initPlaylist() {
-    const listEl = document.getElementById('track-list');
-    const playBtn = document.getElementById('toggle-play');
-    const prevBtn = document.getElementById('prev-track');
-    const nextBtn = document.getElementById('next-track');
-    const unmuteBtn = document.getElementById('unmute');
-
-    if (!listEl) return;
-    listEl.innerHTML = '';
-    if (!PLAYLIST.length) {
-        listEl.innerHTML = '<div class="empty">No tracks yet — add your songs in <code>script.js</code></div>';
-    } else {
-        PLAYLIST.forEach((t, i) => {
-            const item = document.createElement('div');
-            item.className = 'track';
-            item.dataset.index = i;
-            item.innerHTML = `<div class="title">${t.title}</div><div class="duration">--:--</div>`;
-            item.addEventListener('click', () => { playIndex(i); });
-            listEl.appendChild(item);
-        });
-    }
-
-    function updateUI() {
-        document.querySelectorAll('.track').forEach(el => el.classList.remove('playing'));
-        const cur = document.querySelector(`.track[data-index='${playlistIndex}']`);
-        if (cur) cur.classList.add('playing');
-        if (playBtn) playBtn.textContent = audio.paused ? 'Play' : 'Pause';
-    }
-
-    function playIndex(i) {
-        if (!PLAYLIST[i]) return;
-        playlistIndex = i;
-        audio.src = encodeURI(PLAYLIST[i].src);
-        audio.load();
-        audio.play().catch((err) => {
-            console.warn('Audio play prevented (autoplay policy):', err);
-        });
-        updateUI();
-    }
-
-    function nextTrack() {
-        if (!PLAYLIST.length) return;
-        playlistIndex = (playlistIndex + 1) % PLAYLIST.length;
-        playIndex(playlistIndex);
-    }
-    function prevTrack() {
-        if (!PLAYLIST.length) return;
-        playlistIndex = (playlistIndex - 1 + PLAYLIST.length) % PLAYLIST.length;
-        playIndex(playlistIndex);
-    }
-
-    if (nextBtn) nextBtn.addEventListener('click', nextTrack);
-    if (prevBtn) prevBtn.addEventListener('click', prevTrack);
-    if (playBtn) playBtn.addEventListener('click', () => {
-        if (!audio.src && PLAYLIST.length) { playIndex(0); return; }
-        if (audio.paused) audio.play(); else audio.pause();
-        updateUI();
-    });
-
-    // Advance when a track ends
-    audio.addEventListener('ended', () => { nextTrack(); });
-
-    // Update UI on play/pause
-    audio.addEventListener('play', updateUI);
-    audio.addEventListener('pause', updateUI);
-
-    // Fill durations asynchronously
-    PLAYLIST.forEach((t, i) => {
-        if (!t.src) return;
-        const a = document.createElement('audio');
-        a.src = encodeURI(t.src);
-        a.preload = 'metadata';
-        a.addEventListener('loadedmetadata', () => {
-            const dur = document.querySelector(`.track[data-index='${i}'] .duration`);
-            if (dur) dur.textContent = formatTime(Math.floor(a.duration));
-        });
-        a.addEventListener('error', (e) => {
-            console.error('Error loading track', t.src, e);
-            const dur = document.querySelector(`.track[data-index='${i}'] .duration`);
-            if (dur) dur.textContent = 'ERR';
-        });
-    });
-
-    // Respect unmute button: if user clicks it, try to play current source
-    if (unmuteBtn) {
-        unmuteBtn.addEventListener('click', () => {
-            if (audio.src && audio.paused) audio.play().catch(()=>{});
-        });
-    }
-
-    updateUI();
-}
-
-function formatTime(sec) {
-    const m = Math.floor(sec/60); const s = sec%60; return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-}
-
-// Initialize playlist once DOM is ready and restore butterfly cursor
-document.addEventListener('DOMContentLoaded', () => { initPlaylist(); setupButterflyCursor(); });
+// Initialize butterfly cursor (playlist lives in playlist.js)
+document.addEventListener('DOMContentLoaded', () => { setupButterflyCursor(); });
 
 function setupButterflyCursor() {
     if (window.__butterflyCursorReady) return;
     window.__butterflyCursorReady = true;
 
+    const isTouch = window.matchMedia('(hover: none), (pointer: coarse)').matches;
     const cursor = document.querySelector('.cursor');
-    if (!cursor) return;
-    cursor.textContent = '🦋';
-    cursor.style.left = '0px';
-    cursor.style.top = '0px';
+    if (!cursor || isTouch) {
+        if (cursor) cursor.style.display = 'none';
+        return;
+    }
+
+    const BUTTERFLY_HUES = [0, 35, 75, 145, 210, 265, 310, 340];
+
+    function butterflyFilter(hue, saturate = 1.35) {
+        return `hue-rotate(${hue}deg) saturate(${saturate}) drop-shadow(0 0 6px rgba(255, 120, 200, 0.45))`;
+    }
+
+    function randomHue() {
+        return BUTTERFLY_HUES[Math.floor(Math.random() * BUTTERFLY_HUES.length)];
+    }
+
+    // Multi-color butterfly cluster on cursor
+    cursor.innerHTML = '';
+    cursor.classList.add('cursor--butterflies');
+    const orbitHues = [0, 55, 130, 205, 285, 325];
+    orbitHues.forEach((hue, i) => {
+        const b = document.createElement('span');
+        b.className = 'cursor-butterfly' + (i === 0 ? ' cursor-butterfly--lead' : ' cursor-butterfly--orbit');
+        b.textContent = '🦋';
+        b.style.filter = butterflyFilter(hue, i === 0 ? 1.5 : 1.25);
+        b.style.setProperty('--orbit-i', i);
+        cursor.appendChild(b);
+    });
+
+    let hueTick = 0;
+    const orbitButterflies = cursor.querySelectorAll('.cursor-butterfly--orbit');
 
     const spawnButterfly = (x, y, size = 'small') => {
         const b = document.createElement('div');
         b.className = 'butterfly ' + (size === 'large' ? 'large' : 'small');
         b.textContent = '🦋';
+        const hue = randomHue();
+        b.style.filter = butterflyFilter(hue, 1.2 + Math.random() * 0.4);
         document.body.appendChild(b);
         b.style.left = x + 'px';
         b.style.top = y + 'px';
@@ -146,22 +63,35 @@ function setupButterflyCursor() {
         });
     };
 
-    const TRAIL_PROB = 0.12;
+    const TRAIL_PROB = 0.18;
     document.addEventListener('mousemove', (e) => {
         cursor.style.left = e.clientX + 'px';
         cursor.style.top = e.clientY + 'px';
+
+        // gently shift orbit butterfly colors as you move
+        hueTick += 1;
+        if (hueTick % 8 === 0) {
+            orbitButterflies.forEach((b, i) => {
+                const hue = BUTTERFLY_HUES[(hueTick / 8 + i) % BUTTERFLY_HUES.length];
+                b.style.filter = butterflyFilter(hue, 1.25);
+            });
+        }
+
         if (Math.random() < TRAIL_PROB) {
-            spawnButterfly(e.clientX + (Math.random() * 20 - 10), e.clientY + (Math.random() * 20 - 10));
+            spawnButterfly(
+                e.clientX + (Math.random() * 24 - 12),
+                e.clientY + (Math.random() * 24 - 12)
+            );
         }
     });
 
     document.addEventListener('click', (e) => {
-        const burstCount = 18;
+        const burstCount = 22;
         for (let i = 0; i < burstCount; i++) {
             spawnButterfly(
-                e.clientX + (Math.random() * 120 - 60),
-                e.clientY + (Math.random() * 120 - 60),
-                Math.random() > 0.65 ? 'large' : 'small'
+                e.clientX + (Math.random() * 140 - 70),
+                e.clientY + (Math.random() * 140 - 70),
+                Math.random() > 0.6 ? 'large' : 'small'
             );
         }
     });
@@ -184,6 +114,23 @@ function updateTimerElements(d, h, m, s) {
 function startCountdown(targetDate) {
     if (overlay) overlay.classList.remove('hidden');
 
+    const bgVideo = document.getElementById('countdown-video');
+    if (bgVideo) {
+        bgVideo.muted = true;
+        bgVideo.currentTime = 0;
+        const playPromise = bgVideo.play();
+        if (playPromise && playPromise.catch) {
+            playPromise.catch(() => {
+                // Autoplay blocked until user interaction — try again on first tap
+                const resume = () => {
+                    bgVideo.play().catch(() => {});
+                    document.removeEventListener('pointerdown', resume);
+                };
+                document.addEventListener('pointerdown', resume, { once: true });
+            });
+        }
+    }
+
     // animate overlay in (letterbox bars + subtle zoom)
     const top = document.querySelector('.letterbox.top');
     const bottom = document.querySelector('.letterbox.bottom');
@@ -193,6 +140,17 @@ function startCountdown(targetDate) {
     }
     if (content) {
         gsap.fromTo(content, { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 1.2, ease: 'power2.out', delay: 0.3 });
+    }
+
+    // Unmute button toggles background video sound
+    const unmuteBtn = document.getElementById('unmute');
+    if (unmuteBtn && bgVideo && !unmuteBtn.dataset.videoBound) {
+        unmuteBtn.dataset.videoBound = '1';
+        unmuteBtn.addEventListener('click', () => {
+            bgVideo.muted = !bgVideo.muted;
+            unmuteBtn.textContent = bgVideo.muted ? '🔈' : '🔊';
+            if (bgVideo.paused) bgVideo.play().catch(() => {});
+        });
     }
 
     let interval;
@@ -317,21 +275,17 @@ function celebrate() {
         // hide overlay after celebration
         const overlayEl = document.getElementById('countdown-overlay');
         if (overlayEl) overlayEl.classList.add('hidden');
+        const bgVideo = document.getElementById('countdown-video');
+        if (bgVideo) {
+            bgVideo.pause();
+            bgVideo.currentTime = 0;
+        }
         // init main page
         initMain();
     }, 4500);
 }
 // Main page initialization (animations, typing, floating elements)
 function initMain() {
-    // Cursor following effect
-    const cursor = document.querySelector('.cursor');
-    if (cursor) {
-        document.addEventListener('mousemove', (e) => {
-            cursor.style.left = e.clientX + 'px';
-            cursor.style.top = e.clientY + 'px';
-        });
-    }
-
     // Typing effect for greeting
     const greetingText = "Hey You Know What! You're the most adorable human I ever met! 💖";
     const greetingElement = document.querySelector('.greeting');
@@ -394,6 +348,7 @@ function initMain() {
             gsap.to(button, { scale: 1, duration: 0.3 });
         });
         button.addEventListener('click', () => {
+            if (window.savePlaylistState) window.savePlaylistState();
             gsap.to('body', {
                 opacity: 0,
                 duration: 1,
@@ -408,6 +363,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const now = new Date();
     const year = now.getFullYear();
     const birthdayThisYear = new Date(year, 7, 14, 0, 0, 0); // August is month 7
+    // const birthdayThisYear = new Date(Date.now() + 60 * 100);
     if (now < birthdayThisYear) {
         startCountdown(birthdayThisYear);
     } else {

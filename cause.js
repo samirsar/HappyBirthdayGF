@@ -44,6 +44,14 @@ function createReasonCard(reason) {
     
     card.appendChild(text);
     card.appendChild(gifOverlay);
+
+    // Tap to show gif on touch devices (hover doesn't work on mobile)
+    card.addEventListener('click', () => {
+        document.querySelectorAll('.reason-card.active').forEach((el) => {
+            if (el !== card) el.classList.remove('active');
+        });
+        card.classList.toggle('active');
+    });
     
     gsap.from(card, {
         opacity: 0,
@@ -79,11 +87,12 @@ function displayNewReason() {
                     shuffleButton.textContent = "Enter Our Storylane 💫";
                     shuffleButton.classList.add('story-mode');
                     shuffleButton.addEventListener('click', () => {
+                        if (window.savePlaylistState) window.savePlaylistState();
                         gsap.to('body', {
                             opacity: 0,
                             duration: 1,
                             onComplete: () => {
-                                window.location.href = 'last.html'; // Replace with the actual URL of the next page
+                                window.location.href = 'last.html';
                             }
                         });
                     });
@@ -134,15 +143,20 @@ function createFloatingElement() {
     });
 }
 
-// Custom cursor (same as before)
+// Custom cursor (desktop only)
 const cursor = document.querySelector('.custom-cursor');
-document.addEventListener('mousemove', (e) => {
-    gsap.to(cursor, {
-        x: e.clientX - 15,
-        y: e.clientY - 15,
-        duration: 0.2
+const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+if (cursor && canHover) {
+    document.addEventListener('mousemove', (e) => {
+        gsap.to(cursor, {
+            x: e.clientX - 15,
+            y: e.clientY - 15,
+            duration: 0.2
+        });
     });
-});
+} else if (cursor) {
+    cursor.style.display = 'none';
+}
 
 // Create initial floating elements
 setInterval(createFloatingElement, 2000);

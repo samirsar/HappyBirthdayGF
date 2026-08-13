@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Our Beautiful Memories ✨</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Quicksand:wght@300;400;500;600&display=swap');
@@ -14,8 +14,13 @@
             box-sizing: border-box;
         }
 
+        html {
+            -webkit-text-size-adjust: 100%;
+        }
+
         body {
             min-height: 100vh;
+            min-height: 100dvh;
             background: linear-gradient(135deg,
                     #ffd1dc 0%,
                     #e6e6fa 25%,
@@ -27,6 +32,7 @@
             font-family: 'Quicksand', sans-serif;
             overflow-x: hidden;
             color: #4a4a4a;
+            padding-bottom: env(safe-area-inset-bottom);
         }
 
         @keyframes gradientFlow {
@@ -136,35 +142,37 @@
         /* Welcome Section */
         .welcome {
             text-align: center;
-            padding: 4rem 2rem;
+            padding: clamp(2rem, 6vw, 4rem) clamp(1rem, 4vw, 2rem);
             position: relative;
             z-index: 3;
         }
 
         .welcome h1 {
             font-family: 'Dancing Script', cursive;
-            font-size: 4rem;
+            font-size: clamp(2rem, 8vw, 4rem);
             color: #ff69b4;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
             animation: fadeInScale 2s ease;
+            line-height: 1.2;
         }
 
         .welcome p {
-            font-size: 1.2rem;
+            font-size: clamp(1rem, 3.5vw, 1.2rem);
             max-width: 600px;
-            margin: 1.5rem auto;
+            margin: 1.25rem auto 0;
             line-height: 1.6;
             animation: fadeIn 2s ease 0.5s both;
+            padding: 0 0.25rem;
         }
 
         /* Enhanced Memory Cards */
         .memory-container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 2rem;
+            padding: clamp(1rem, 3vw, 2rem);
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+            gap: clamp(1rem, 3vw, 2rem);
             z-index: 3;
             position: relative;
         }
@@ -172,7 +180,7 @@
         .memory-card {
             background: rgba(255, 255, 255, 0.9);
             border-radius: 20px;
-            padding: 1.5rem;
+            padding: 1.25rem;
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
             transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
@@ -202,11 +210,13 @@
 
         .memory-img {
             width: 100%;
-            height: 250px;
+            height: auto;
+            aspect-ratio: 4 / 3;
             object-fit: cover;
             border-radius: 15px;
             margin-bottom: 1rem;
             transition: transform 0.5s ease;
+            display: block;
         }
 
         .memory-card:hover .memory-img {
@@ -216,33 +226,34 @@
         .memory-date {
             font-family: 'Dancing Script', cursive;
             color: #ff69b4;
-            font-size: 1.3rem;
+            font-size: clamp(1.15rem, 3.5vw, 1.3rem);
             margin-bottom: 0.5rem;
         }
 
         .memory-caption {
-            font-size: 1rem;
-            line-height: 1.5;
+            font-size: clamp(0.95rem, 3vw, 1rem);
+            line-height: 1.55;
             color: #666;
         }
 
         /* Final Message Section */
         .final-message {
             text-align: center;
-            padding: 4rem 2rem;
+            padding: clamp(2rem, 6vw, 4rem) clamp(1rem, 4vw, 2rem);
             background: rgba(255, 255, 255, 0.3);
             backdrop-filter: blur(10px);
-            margin-top: 3rem;
+            margin-top: 2rem;
             position: relative;
             z-index: 3;
         }
 
         .final-message h2 {
             font-family: 'Dancing Script', cursive;
-            font-size: 3rem;
+            font-size: clamp(1.75rem, 7vw, 3rem);
             color: #ff69b4;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
             animation: heartbeat 2s infinite;
+            line-height: 1.2;
         }
 
         @keyframes heartbeat {
@@ -258,16 +269,16 @@
         }
 
         .final-message p {
-            font-size: 1.2rem;
+            font-size: clamp(1rem, 3.5vw, 1.2rem);
             max-width: 800px;
-            margin: 0 auto 2rem;
-            line-height: 1.8;
+            margin: 0 auto 1.5rem;
+            line-height: 1.7;
         }
 
         .goodbye-btn {
             display: inline-block;
-            padding: 1rem 2rem;
-            font-size: 1.2rem;
+            padding: 0.95rem 1.6rem;
+            font-size: clamp(1rem, 3.5vw, 1.2rem);
             background: linear-gradient(45deg, #ff69b4, #da70d6);
             color: white;
             border: none;
@@ -277,6 +288,9 @@
             transition: all 0.3s ease;
             box-shadow: 0 5px 15px rgba(255, 105, 180, 0.4);
             animation: float 3s infinite ease-in-out;
+            min-height: 48px;
+            touch-action: manipulation;
+            max-width: 100%;
         }
 
         .goodbye-btn:hover {
@@ -342,24 +356,69 @@
             border-radius: 6px;
         }
 
+        /* Persistent corner balloon */
+        .corner-balloon {
+            position: fixed;
+            left: max(0.35rem, env(safe-area-inset-left));
+            bottom: max(0.25rem, env(safe-area-inset-bottom));
+            width: min(140px, 28vw);
+            height: auto;
+            z-index: 95;
+            pointer-events: none;
+            user-select: none;
+            animation: balloonFloat 3.5s ease-in-out infinite;
+        }
+
+        @keyframes balloonFloat {
+            0%, 100% { transform: translateY(0) rotate(-2deg); }
+            50% { transform: translateY(-10px) rotate(2deg); }
+        }
+
         /* Responsive Design */
         @media (max-width: 768px) {
-            .welcome h1 {
-                font-size: 3rem;
-            }
-
             .memory-container {
                 grid-template-columns: 1fr;
+                padding: 1rem 0.85rem;
             }
 
-            .final-message h2 {
-                font-size: 2.5rem;
+            .memory-card:hover {
+                transform: none;
+            }
+
+            .memory-card:hover .memory-img {
+                transform: none;
+            }
+
+            .goodbye-btn:hover {
+                transform: none;
+            }
+
+            .corner-balloon {
+                width: min(78px, 22vw);
+                bottom: max(5.8rem, calc(env(safe-area-inset-bottom) + 5.2rem));
+                opacity: 0.9;
+            }
+
+            .final-message {
+                padding-bottom: 6rem;
+            }
+
+            ::-webkit-scrollbar {
+                width: 6px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .final-message p br {
+                display: none;
             }
         }
     </style>
+    <link rel="stylesheet" href="playlist.css">
 </head>
 
 <body>
+    <img src="balloon.png" alt="" class="corner-balloon" aria-hidden="true">
     <div class="magic-sparkles"></div>
     <div class="floating-hearts">
         <!-- Hearts will be generated via CSS -->
@@ -379,7 +438,7 @@
         <div class="memory-card">
             <img src="./d1.jpg" alt="First Date" class="memory-img">
             <div class="memory-date">Her Smile Says It All</div>
-            <div class="memory-caption">You’re truly one of the sweetest girls I know, and I feel lucky to have a sis
+            <div class="memory-caption">You’re truly one of the sweetest girls I know, and I feel lucky to have a girl
                 like you.❤️</div>
         </div>
         <div class="memory-card">
@@ -404,6 +463,21 @@
         <p>You deserve all the joy in the world—keep shining and spreading your beautiful energy.✨</p>
         <a href="#" class="goodbye-btn">Until We Meet Again 💝</a>
     </section>
+
+    <aside id="playlist" class="playlist">
+        <div class="playlist-header">
+            <span>Playlist</span>
+            <button type="button" id="playlist-toggle" class="playlist-toggle" aria-label="expand playlist" aria-expanded="false">▲</button>
+        </div>
+        <div id="track-list" class="track-list"></div>
+        <div class="playlist-controls">
+            <button id="prev-track" aria-label="previous">⟨</button>
+            <button id="toggle-play" aria-label="play">Play</button>
+            <button id="next-track" aria-label="next">⟩</button>
+        </div>
+    </aside>
+
+    <script src="playlist.js"></script>
 </body>
 
 </html>

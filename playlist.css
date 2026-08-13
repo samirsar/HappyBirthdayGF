@@ -1,0 +1,148 @@
+/* Shared playlist — used on every page */
+.playlist {
+    position: fixed;
+    right: 1.25rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 300px;
+    max-width: 85vw;
+    background: linear-gradient(180deg, rgba(40, 20, 40, 0.78), rgba(20, 10, 25, 0.85));
+    border-radius: 12px;
+    padding: 0.6rem;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35);
+    z-index: 90;
+    color: #fff;
+    backdrop-filter: blur(10px) saturate(1.1);
+    font-family: 'Quicksand', 'Cinzel', Arial, sans-serif;
+}
+
+.playlist-header {
+    font-weight: 700;
+    margin-bottom: 0.6rem;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.playlist-toggle {
+    display: none;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: #fff;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.track-list {
+    max-height: 360px;
+    overflow: auto;
+    padding: 0.25rem;
+    -webkit-overflow-scrolling: touch;
+}
+
+.track {
+    padding: 0.55rem 0.65rem;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    cursor: pointer;
+    min-height: 44px;
+}
+
+.track + .track {
+    margin-top: 0.35rem;
+}
+
+.track:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.track.playing {
+    background: linear-gradient(90deg, rgba(255, 20, 147, 0.22), rgba(255, 140, 200, 0.1));
+    box-shadow: 0 6px 18px rgba(255, 20, 147, 0.08);
+}
+
+.track .title {
+    font-size: 0.95rem;
+}
+
+.track .duration {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.6);
+    flex-shrink: 0;
+}
+
+.playlist-controls {
+    display: flex;
+    gap: 8px;
+    margin-top: 0.6rem;
+    justify-content: center;
+}
+
+.playlist-controls button {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border: none;
+    padding: 0.55rem 0.9rem;
+    border-radius: 8px;
+    cursor: pointer;
+    min-height: 44px;
+    min-width: 44px;
+    font-size: 0.95rem;
+}
+
+.playlist .empty {
+    padding: 1rem;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.95rem;
+}
+
+@media (max-width: 768px) {
+    .playlist {
+        left: 50%;
+        right: auto;
+        top: auto;
+        bottom: max(0.65rem, env(safe-area-inset-bottom));
+        transform: translateX(-50%);
+        width: min(420px, calc(100vw - 1.2rem));
+        max-width: none;
+        padding: 0.5rem 0.65rem;
+        border-radius: 16px;
+    }
+
+    .playlist-header {
+        margin-bottom: 0.35rem;
+        justify-content: space-between;
+        padding: 0 0.15rem;
+        font-size: 0.95rem;
+    }
+
+    .playlist-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .playlist:not(.expanded) .track-list {
+        display: none;
+    }
+
+    .playlist.expanded .track-list {
+        display: block;
+        max-height: 28vh;
+        margin-bottom: 0.25rem;
+    }
+
+    .playlist-controls {
+        margin-top: 0.35rem;
+    }
+}
