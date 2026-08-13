@@ -20,15 +20,28 @@ body {
 }
 
 .cursor {
-    width: 20px;
-    height: 20px;
-    background: pink;
-    border-radius: 50%;
     position: fixed;
     pointer-events: none;
-    mix-blend-mode: difference;
-    transition: transform 0.2s;
+    transform: translate(-50%, -50%);
+    font-size: 28px;
+    width: auto;
+    height: auto;
+    line-height: 1;
+    transition: transform 0.12s linear, opacity 0.2s;
+    z-index: 100;
 }
+
+/* Emitted butterfly particles */
+.butterfly {
+    position: fixed;
+    pointer-events: none;
+    font-size: 20px;
+    will-change: transform, opacity;
+    z-index: 99;
+    transform-origin: center center;
+}
+.butterfly.small { font-size: 14px; }
+.butterfly.large { font-size: 28px; }
 
 /* Cinematic overlays */
 .overlay {

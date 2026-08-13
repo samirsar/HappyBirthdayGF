@@ -5,7 +5,7 @@ const GIRL_NAME = 'Jenny';
 const PLAYLIST = [
     // Example:
     // { title: 'My Song', src: 'music/song1.mp3' },
-    {title:'Main Tera Ho Gaya', src:'music/Main Tera Ho Gaya.mp3'},
+    { title: 'Main Tera Ho Gaya', src: 'music/Main Tera Ho Gaya Karneast (pagalall.com).mp3' },
 ];
 
 // Playlist runtime state
@@ -47,9 +47,10 @@ function initPlaylist() {
     function playIndex(i) {
         if (!PLAYLIST[i]) return;
         playlistIndex = i;
-        audio.src = PLAYLIST[i].src;
-        audio.play().catch(() => {
-            // autoplay blocked — wait for user gesture
+        audio.src = encodeURI(PLAYLIST[i].src);
+        audio.load();
+        audio.play().catch((err) => {
+            console.warn('Audio play prevented (autoplay policy):', err);
         });
         updateUI();
     }
@@ -84,11 +85,16 @@ function initPlaylist() {
     PLAYLIST.forEach((t, i) => {
         if (!t.src) return;
         const a = document.createElement('audio');
-        a.src = t.src;
+        a.src = encodeURI(t.src);
         a.preload = 'metadata';
         a.addEventListener('loadedmetadata', () => {
             const dur = document.querySelector(`.track[data-index='${i}'] .duration`);
             if (dur) dur.textContent = formatTime(Math.floor(a.duration));
+        });
+        a.addEventListener('error', (e) => {
+            console.error('Error loading track', t.src, e);
+            const dur = document.querySelector(`.track[data-index='${i}'] .duration`);
+            if (dur) dur.textContent = 'ERR';
         });
     });
 
@@ -106,8 +112,60 @@ function formatTime(sec) {
     const m = Math.floor(sec/60); const s = sec%60; return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
 }
 
-// Initialize playlist once DOM is ready
-document.addEventListener('DOMContentLoaded', () => { initPlaylist(); });
+// Initialize playlist once DOM is ready and restore butterfly cursor
+document.addEventListener('DOMContentLoaded', () => { initPlaylist(); setupButterflyCursor(); });
+
+function setupButterflyCursor() {
+    if (window.__butterflyCursorReady) return;
+    window.__butterflyCursorReady = true;
+
+    const cursor = document.querySelector('.cursor');
+    if (!cursor) return;
+    cursor.textContent = '🦋';
+    cursor.style.left = '0px';
+    cursor.style.top = '0px';
+
+    const spawnButterfly = (x, y, size = 'small') => {
+        const b = document.createElement('div');
+        b.className = 'butterfly ' + (size === 'large' ? 'large' : 'small');
+        b.textContent = '🦋';
+        document.body.appendChild(b);
+        b.style.left = x + 'px';
+        b.style.top = y + 'px';
+        const dx = (Math.random() - 0.5) * 200;
+        const dy = -(Math.random() * 200 + 60);
+        const rot = (Math.random() - 0.5) * 720;
+        gsap.to(b, {
+            x: dx,
+            y: dy,
+            rotation: rot,
+            opacity: 0,
+            duration: Math.random() * 1.6 + 1.2,
+            ease: 'power1.out',
+            onComplete: () => b.remove()
+        });
+    };
+
+    const TRAIL_PROB = 0.12;
+    document.addEventListener('mousemove', (e) => {
+        cursor.style.left = e.clientX + 'px';
+        cursor.style.top = e.clientY + 'px';
+        if (Math.random() < TRAIL_PROB) {
+            spawnButterfly(e.clientX + (Math.random() * 20 - 10), e.clientY + (Math.random() * 20 - 10));
+        }
+    });
+
+    document.addEventListener('click', (e) => {
+        const burstCount = 18;
+        for (let i = 0; i < burstCount; i++) {
+            spawnButterfly(
+                e.clientX + (Math.random() * 120 - 60),
+                e.clientY + (Math.random() * 120 - 60),
+                Math.random() > 0.65 ? 'large' : 'small'
+            );
+        }
+    });
+}
 
 // Countdown overlay elements
 const overlay = document.getElementById('countdown-overlay');
