@@ -31,76 +31,7 @@ body {
     body { cursor: none; }
 }
 
-.cursor {
-    position: fixed;
-    pointer-events: none;
-    transform: translate(-50%, -50%);
-    width: 56px;
-    height: 56px;
-    line-height: 1;
-    transition: transform 0.12s linear, opacity 0.2s;
-    z-index: 100;
-}
-
-.cursor--butterflies {
-    display: block;
-}
-
-.cursor-butterfly {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    pointer-events: none;
-    user-select: none;
-}
-
-.cursor-butterfly--lead {
-    font-size: 30px;
-    z-index: 3;
-    animation: cursorLeadFloat 2.2s ease-in-out infinite;
-}
-
-.cursor-butterfly--orbit {
-    font-size: 14px;
-    z-index: 2;
-    animation: cursorOrbit 2.8s ease-in-out infinite;
-    animation-delay: calc(var(--orbit-i, 0) * -0.45s);
-    offset-path: none;
-}
-
-.cursor-butterfly--orbit:nth-child(2) { transform: translate(-50%, -50%) translate(-16px, -14px); }
-.cursor-butterfly--orbit:nth-child(3) { transform: translate(-50%, -50%) translate(16px, -12px); }
-.cursor-butterfly--orbit:nth-child(4) { transform: translate(-50%, -50%) translate(14px, 14px); }
-.cursor-butterfly--orbit:nth-child(5) { transform: translate(-50%, -50%) translate(-15px, 13px); }
-.cursor-butterfly--orbit:nth-child(6) { transform: translate(-50%, -50%) translate(0px, -20px); }
-
-@keyframes cursorLeadFloat {
-    0%, 100% { transform: translate(-50%, -50%) scale(1) rotate(-4deg); }
-    50% { transform: translate(-50%, -50%) scale(1.08) rotate(4deg); }
-}
-
-@keyframes cursorOrbit {
-    0%, 100% { opacity: 0.85; }
-    50% { opacity: 1; }
-}
-
-@media (hover: none), (pointer: coarse) {
-    .cursor,
-    .butterfly { display: none !important; }
-}
-
-/* Emitted butterfly particles */
-.butterfly {
-    position: fixed;
-    pointer-events: none;
-    font-size: 20px;
-    will-change: transform, opacity;
-    z-index: 99;
-    transform-origin: center center;
-}
-.butterfly.small { font-size: 14px; }
-.butterfly.large { font-size: 28px; }
+/* Cursor + butterfly styles live in butterflies.css */
 
 /* Cinematic overlays */
 .overlay {

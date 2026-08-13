@@ -1,102 +1,5 @@
 const GIRL_NAME = 'Jenny';
 
-// Initialize butterfly cursor (playlist lives in playlist.js)
-document.addEventListener('DOMContentLoaded', () => { setupButterflyCursor(); });
-
-function setupButterflyCursor() {
-    if (window.__butterflyCursorReady) return;
-    window.__butterflyCursorReady = true;
-
-    const isTouch = window.matchMedia('(hover: none), (pointer: coarse)').matches;
-    const cursor = document.querySelector('.cursor');
-    if (!cursor || isTouch) {
-        if (cursor) cursor.style.display = 'none';
-        return;
-    }
-
-    const BUTTERFLY_HUES = [0, 35, 75, 145, 210, 265, 310, 340];
-
-    function butterflyFilter(hue, saturate = 1.35) {
-        return `hue-rotate(${hue}deg) saturate(${saturate}) drop-shadow(0 0 6px rgba(255, 120, 200, 0.45))`;
-    }
-
-    function randomHue() {
-        return BUTTERFLY_HUES[Math.floor(Math.random() * BUTTERFLY_HUES.length)];
-    }
-
-    // Multi-color butterfly cluster on cursor
-    cursor.innerHTML = '';
-    cursor.classList.add('cursor--butterflies');
-    const orbitHues = [0, 55, 130, 205, 285, 325];
-    orbitHues.forEach((hue, i) => {
-        const b = document.createElement('span');
-        b.className = 'cursor-butterfly' + (i === 0 ? ' cursor-butterfly--lead' : ' cursor-butterfly--orbit');
-        b.textContent = '🦋';
-        b.style.filter = butterflyFilter(hue, i === 0 ? 1.5 : 1.25);
-        b.style.setProperty('--orbit-i', i);
-        cursor.appendChild(b);
-    });
-
-    let hueTick = 0;
-    const orbitButterflies = cursor.querySelectorAll('.cursor-butterfly--orbit');
-
-    const spawnButterfly = (x, y, size = 'small') => {
-        const b = document.createElement('div');
-        b.className = 'butterfly ' + (size === 'large' ? 'large' : 'small');
-        b.textContent = '🦋';
-        const hue = randomHue();
-        b.style.filter = butterflyFilter(hue, 1.2 + Math.random() * 0.4);
-        document.body.appendChild(b);
-        b.style.left = x + 'px';
-        b.style.top = y + 'px';
-        const dx = (Math.random() - 0.5) * 200;
-        const dy = -(Math.random() * 200 + 60);
-        const rot = (Math.random() - 0.5) * 720;
-        gsap.to(b, {
-            x: dx,
-            y: dy,
-            rotation: rot,
-            opacity: 0,
-            duration: Math.random() * 1.6 + 1.2,
-            ease: 'power1.out',
-            onComplete: () => b.remove()
-        });
-    };
-
-    const TRAIL_PROB = 0.18;
-    document.addEventListener('mousemove', (e) => {
-        cursor.style.left = e.clientX + 'px';
-        cursor.style.top = e.clientY + 'px';
-
-        // gently shift orbit butterfly colors as you move
-        hueTick += 1;
-        if (hueTick % 8 === 0) {
-            orbitButterflies.forEach((b, i) => {
-                const hue = BUTTERFLY_HUES[(hueTick / 8 + i) % BUTTERFLY_HUES.length];
-                b.style.filter = butterflyFilter(hue, 1.25);
-            });
-        }
-
-        if (Math.random() < TRAIL_PROB) {
-            spawnButterfly(
-                e.clientX + (Math.random() * 24 - 12),
-                e.clientY + (Math.random() * 24 - 12)
-            );
-        }
-    });
-
-    document.addEventListener('click', (e) => {
-        const burstCount = 22;
-        for (let i = 0; i < burstCount; i++) {
-            spawnButterfly(
-                e.clientX + (Math.random() * 140 - 70),
-                e.clientY + (Math.random() * 140 - 70),
-                Math.random() > 0.6 ? 'large' : 'small'
-            );
-        }
-    });
-}
-
 // Countdown overlay elements
 const overlay = document.getElementById('countdown-overlay');
 const daysEl = () => document.getElementById('days');
@@ -287,7 +190,7 @@ function celebrate() {
 // Main page initialization (animations, typing, floating elements)
 function initMain() {
     // Typing effect for greeting
-    const greetingText = "Hey You Know What! You're the most adorable human I ever met! 💖";
+    const greetingText = "Hey You Know What! You make my days better just by being you! 💖 Happy Birthday, baby! 🎂😘";
     const greetingElement = document.querySelector('.greeting');
     let charIndex = 0;
     function typeGreeting() {
@@ -362,8 +265,8 @@ function initMain() {
 document.addEventListener('DOMContentLoaded', () => {
     const now = new Date();
     const year = now.getFullYear();
-    const birthdayThisYear = new Date(year, 7, 14, 0, 0, 0); // August is month 7
-    // const birthdayThisYear = new Date(Date.now() + 60 * 100);
+    // const birthdayThisYear = new Date(year, 7, 14, 0, 0, 0); // August is month 7
+    const birthdayThisYear = new Date(Date.now() + 60 * 100);
     if (now < birthdayThisYear) {
         startCountdown(birthdayThisYear);
     } else {
