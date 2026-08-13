@@ -10,6 +10,11 @@ html {
     -webkit-text-size-adjust: 100%;
 }
 
+html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+}
+
 body {
     min-height: 100vh;
     min-height: 100dvh;
@@ -18,8 +23,7 @@ body {
     animation: gradientBG 15s ease infinite;
     font-family: 'Quicksand', sans-serif;
     overflow-x: hidden;
-    padding: 1.25rem;
-    padding-bottom: max(2rem, env(safe-area-inset-bottom));
+    padding: 0;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -47,6 +51,14 @@ body {
     * { cursor: auto !important; }
 }
 
+.hero-screen {
+    min-height: auto;
+    padding: 1.25rem 1.25rem 0.5rem;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+}
+
 .container {
     max-width: 1200px;
     margin: 0 auto;
@@ -54,6 +66,112 @@ body {
     position: relative;
     z-index: 1;
     width: 100%;
+}
+
+.scroll-to-reel {
+    display: none;
+}
+
+.after-reel {
+    padding: 2.5rem 1.25rem 8rem;
+    text-align: center;
+}
+
+/* Instagram-style photo reel */
+.photo-reel {
+    position: relative;
+    z-index: 2;
+    width: min(420px, 100%);
+    margin: 0 auto 6.5rem;
+    height: min(86vh, 780px);
+    border-radius: 28px;
+    overflow: hidden;
+    box-shadow: 0 18px 50px rgba(255, 105, 180, 0.28);
+    background: #1a1016;
+}
+
+.reel-track {
+    height: 100%;
+    overflow-y: auto;
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+}
+
+.reel-slide {
+    position: relative;
+    height: 100%;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    overflow: hidden;
+}
+
+.reel-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.reel-caption {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 4.5rem 1.2rem 1.4rem;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.62));
+    color: #fff;
+    text-align: left;
+}
+
+.reel-count {
+    display: inline-block;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    opacity: 0.85;
+    margin-bottom: 0.35rem;
+}
+
+.reel-caption p {
+    font-size: 1.05rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.reel-progress {
+    position: absolute;
+    top: 0.7rem;
+    left: 0.8rem;
+    right: 0.8rem;
+    z-index: 4;
+    display: flex;
+    gap: 4px;
+    pointer-events: none;
+}
+
+.reel-bar {
+    flex: 1;
+    height: 3px;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.35);
+}
+
+.reel-bar.active {
+    background: #fff;
+}
+
+.reel-hint {
+    position: absolute;
+    right: 0.9rem;
+    bottom: 5.2rem;
+    z-index: 4;
+    color: #fff;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    writing-mode: vertical-rl;
+    opacity: 0.7;
+    pointer-events: none;
+    animation: bounce 1.6s ease infinite;
 }
 
 h1 {
@@ -229,8 +347,24 @@ h1 {
 }
 
 @media (max-width: 768px) {
-    body {
-        padding: 1rem 0.75rem 7.5rem;
+    .hero-screen {
+        padding: 1rem 0.75rem 0.25rem;
+    }
+
+    .after-reel {
+        padding: 2rem 0.75rem 8.5rem;
+    }
+
+    .photo-reel {
+        width: 100%;
+        height: 100dvh;
+        margin: 0;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .reel-caption {
+        padding-bottom: 7.2rem;
     }
 
     .reason-card {

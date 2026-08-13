@@ -60,6 +60,44 @@ body {
     pointer-events: none;
 }
 
+.firecracker-video {
+    display: none;
+    z-index: 1;
+}
+
+.overlay.celebrating .countdown-video:not(.firecracker-video) {
+    display: none;
+}
+
+.overlay.celebrating .firecracker-video {
+    display: block;
+}
+
+.overlay.celebrating .countdown-content,
+.overlay.celebrating .letterbox,
+.overlay.celebrating .film-grain,
+.overlay.celebrating .vignette,
+.overlay.celebrating .mutebtn {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+.overlay.celebrating ~ .playlist {
+    pointer-events: none;
+    opacity: 0.35;
+}
+
+.overlay.celebrating .countdown-video-shade {
+    background: linear-gradient(
+        180deg,
+        rgba(0, 0, 0, 0.2) 0%,
+        rgba(0, 0, 0, 0.12) 45%,
+        rgba(0, 0, 0, 0.45) 100%
+    );
+}
+
 .countdown-video-shade {
     position: absolute;
     inset: 0;
@@ -153,7 +191,7 @@ body {
     pointer-events: none;
     font-family: 'Cinzel', serif;
     color: #fff;
-    text-shadow: 0 8px 30px rgba(255,0,150,0.3);
+    text-shadow: 0 8px 30px rgba(255, 80, 0, 0.55), 0 0 40px rgba(255, 200, 80, 0.4);
     font-size: clamp(1.6rem, 7vw, 4rem);
     opacity: 0;
     padding: 1rem;

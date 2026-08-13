@@ -14,6 +14,33 @@ function updateTimerElements(d, h, m, s) {
     secondsEl().textContent = String(s).padStart(2, '0');
 }
 
+// Celebration: firecracker video + Diwali crackers audio (at least 30s)
+const CELEBRATION_MS = 30000;
+const crackersAudio = new Audio('music/diwali_crackers.mp3');
+crackersAudio.loop = true;
+crackersAudio.preload = 'auto';
+let crackersUnlocked = false;
+
+function unlockCrackersAudio() {
+    const p = crackersAudio.play();
+    if (p && p.then) {
+        p.then(() => {
+            crackersAudio.pause();
+            crackersAudio.currentTime = 0;
+            crackersUnlocked = true;
+        }).catch(() => {});
+    }
+}
+
+window.unlockCrackersAudio = unlockCrackersAudio;
+
+function playCrackersNow() {
+    crackersAudio.muted = false;
+    crackersAudio.volume = 1;
+    crackersAudio.currentTime = 0;
+    return crackersAudio.play();
+}
+
 function startCountdown(targetDate) {
     if (overlay) overlay.classList.remove('hidden');
 
@@ -45,14 +72,20 @@ function startCountdown(targetDate) {
         gsap.fromTo(content, { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 1.2, ease: 'power2.out', delay: 0.3 });
     }
 
-    // Unmute button toggles background video sound
+    document.addEventListener('pointerdown', unlockCrackersAudio, { once: true });
+    document.addEventListener('click', unlockCrackersAudio, { once: true });
+
+    // Unmute button unlocks crackers audio (countdown video stays muted)
     const unmuteBtn = document.getElementById('unmute');
-    if (unmuteBtn && bgVideo && !unmuteBtn.dataset.videoBound) {
+    if (unmuteBtn && !unmuteBtn.dataset.videoBound) {
         unmuteBtn.dataset.videoBound = '1';
         unmuteBtn.addEventListener('click', () => {
-            bgVideo.muted = !bgVideo.muted;
-            unmuteBtn.textContent = bgVideo.muted ? '🔈' : '🔊';
-            if (bgVideo.paused) bgVideo.play().catch(() => {});
+            if (window.__celebrating) {
+                playCrackersNow().catch(() => {});
+                return;
+            }
+            unlockCrackersAudio();
+            unmuteBtn.textContent = '🔊';
         });
     }
 
@@ -80,87 +113,51 @@ function startCountdown(targetDate) {
     interval = setInterval(tick, 1000);
 }
 
-// Celebration: fireworks canvas + short melody + reveal main page
 function celebrate() {
-    const canvas = document.getElementById('celebration-canvas');
-    if (canvas) { canvas.style.display = 'block'; }
-    // simple WebAudio melody (short, in-browser)
-    let audioAllowed = false;
-    const unmuteBtn = document.getElementById('unmute');
-    if (unmuteBtn) {
-        unmuteBtn.addEventListener('click', () => {
-            audioAllowed = !audioAllowed;
-            unmuteBtn.textContent = audioAllowed ? '🔊' : '🔈';
+    window.__celebrating = true;
+
+    const overlayEl = document.getElementById('countdown-overlay');
+    const countdownVideo = document.getElementById('countdown-video');
+    const crackerVideo = document.getElementById('firecracker-video');
+    const content = document.querySelector('.countdown-content');
+
+    if (overlayEl) overlayEl.classList.add('celebrating');
+    if (content) {
+        gsap.killTweensOf(content);
+        content.style.display = 'none';
+        content.style.opacity = '0';
+        content.style.visibility = 'hidden';
+    }
+    if (countdownVideo) {
+        countdownVideo.pause();
+        countdownVideo.muted = true;
+    }
+
+    if (window.pausePlaylist) window.pausePlaylist();
+
+    if (crackerVideo) {
+        crackerVideo.currentTime = 0;
+        crackerVideo.muted = true;
+        crackerVideo.loop = true;
+        crackerVideo.play().catch(() => {
+            document.addEventListener('pointerdown', () => {
+                crackerVideo.play().catch(() => {});
+                playCrackersNow().catch(() => {});
+            }, { once: true });
         });
     }
 
-    try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        function playMelody() {
-            const now = ctx.currentTime;
-            const notes = [0, 2, 4, 7, 12];
-            notes.forEach((n, i) => {
-                const o = ctx.createOscillator();
-                const g = ctx.createGain();
-                o.type = 'sine';
-                o.frequency.value = 220 * Math.pow(2, n/12);
-                g.gain.value = 0.0015;
-                o.connect(g); g.connect(ctx.destination);
-                o.start(now + i * 0.16);
-                g.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.16 + 0.35);
-                o.stop(now + i * 0.16 + 0.36);
-            });
-        }
-        if (audioAllowed) playMelody();
-        // allow a small user gesture to enable sound if they toggle before
-        if (unmuteBtn) unmuteBtn.addEventListener('click', () => { if (audioAllowed) playMelody(); });
-    } catch (e) { /* audio not available */ }
+    const startSound = () => {
+        playCrackersNow().catch(() => {
+            document.addEventListener('pointerdown', () => {
+                playCrackersNow().catch(() => {});
+            }, { once: true });
+        });
+    };
+    startSound();
+    setTimeout(startSound, 250);
+    setTimeout(startSound, 800);
 
-    // simple fireworks particle system
-    const ctx = canvas && canvas.getContext ? canvas.getContext('2d') : null;
-    let W = window.innerWidth, H = window.innerHeight;
-    if (canvas) { canvas.width = W; canvas.height = H; }
-    const particles = [];
-
-    function spawnBurst(x, y, hue) {
-        const count = 80;
-        for (let i=0;i<count;i++) {
-            particles.push({
-                x, y,
-                vx: (Math.random()-0.5) * (Math.random()*8+2),
-                vy: (Math.random()-0.7) * (Math.random()*8+2),
-                life: Math.random()*60+40,
-                hue: hue + (Math.random()*40-20),
-            });
-        }
-    }
-
-    let frames = 0;
-    function draw() {
-        frames++;
-        if (!ctx) return;
-        ctx.globalCompositeOperation = 'source-over';
-        ctx.fillStyle = 'rgba(0,0,0,0.15)';
-        ctx.fillRect(0,0,W,H);
-        ctx.globalCompositeOperation = 'lighter';
-        for (let i = particles.length-1; i>=0; i--) {
-            const p = particles[i];
-            p.x += p.vx; p.y += p.vy; p.vy += 0.08; p.life--;
-            ctx.beginPath();
-            ctx.fillStyle = `hsla(${p.hue},100%,60%,${Math.max(p.life/80,0)})`;
-            ctx.arc(p.x, p.y, Math.max(p.life/24,1.2), 0, Math.PI*2);
-            ctx.fill();
-            if (p.life <= 0) particles.splice(i,1);
-        }
-        if (frames % 30 === 0) spawnBurst(Math.random()*W, Math.random()*H*0.6, Math.random()*360);
-        if (particles.length > 0) requestAnimationFrame(draw);
-    }
-    spawnBurst(W*0.5, H*0.45, 320);
-    spawnBurst(W*0.3, H*0.4, 200);
-    spawnBurst(W*0.7, H*0.35, 40);
-    requestAnimationFrame(draw);
-
-    // show a big message then reveal main after a moment
     const celebrateMsg = document.createElement('div');
     celebrateMsg.className = 'celebrate-msg';
     celebrateMsg.textContent = `Happy Birthday ${GIRL_NAME}!`;
@@ -168,24 +165,28 @@ function celebrate() {
     gsap.to(celebrateMsg, { opacity: 1, duration: 1.2, scale: 1, ease: 'elastic.out(1,0.6)' });
 
     setTimeout(() => {
+        window.__celebrating = false;
         gsap.to(celebrateMsg, { opacity: 0, duration: 0.9 });
-        if (canvas) canvas.style.display = 'none';
+        crackersAudio.pause();
+        crackersAudio.currentTime = 0;
+        if (crackerVideo) {
+            crackerVideo.pause();
+            crackerVideo.currentTime = 0;
+        }
         const top = document.querySelector('.letterbox.top');
         const bottom = document.querySelector('.letterbox.bottom');
         if (top && bottom) {
             gsap.to([top, bottom], { y: '-20vh', duration: 0.9, ease: 'power3.in' });
         }
-        // hide overlay after celebration
-        const overlayEl = document.getElementById('countdown-overlay');
         if (overlayEl) overlayEl.classList.add('hidden');
-        const bgVideo = document.getElementById('countdown-video');
-        if (bgVideo) {
-            bgVideo.pause();
-            bgVideo.currentTime = 0;
+        if (countdownVideo) {
+            countdownVideo.pause();
+            countdownVideo.currentTime = 0;
         }
-        // init main page
+        celebrateMsg.remove();
+        if (window.resumePlaylist) window.resumePlaylist();
         initMain();
-    }, 4500);
+    }, CELEBRATION_MS);
 }
 // Main page initialization (animations, typing, floating elements)
 function initMain() {

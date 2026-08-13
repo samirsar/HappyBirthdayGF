@@ -40,6 +40,16 @@ function loadPlaylistState() {
 }
 
 window.savePlaylistState = savePlaylistState;
+window.pausePlaylist = function pausePlaylist() {
+    audio.pause();
+    savePlaylistState();
+};
+window.resumePlaylist = function resumePlaylist() {
+    if (window.__celebrating) return;
+    if (audio.getAttribute('src')) {
+        audio.play().catch(() => {});
+    }
+};
 
 function initPlaylist() {
     const listEl = document.getElementById('track-list');
@@ -82,6 +92,8 @@ function initPlaylist() {
     }
 
     function playIndex(i, startAt = 0) {
+        if (window.__celebrating) return;
+        if (window.unlockCrackersAudio) window.unlockCrackersAudio();
         if (!PLAYLIST[i]) return;
         playlistIndex = i;
         audio.src = PLAYLIST[i].src;
@@ -120,6 +132,7 @@ function initPlaylist() {
     if (prevBtn) prevBtn.addEventListener('click', prevTrack);
     if (playBtn) {
         playBtn.addEventListener('click', () => {
+            if (window.__celebrating) return;
             if (!PLAYLIST.length) return;
             if (!audio.getAttribute('src')) {
                 playIndex(playlistIndex || 0);
@@ -168,6 +181,7 @@ function initPlaylist() {
 
     if (unmuteBtn) {
         unmuteBtn.addEventListener('click', () => {
+            if (window.__celebrating) return;
             if (!PLAYLIST.length) return;
             if (!audio.getAttribute('src')) {
                 playIndex(0);

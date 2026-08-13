@@ -1,3 +1,17 @@
+// Photo reel — add more files from the images folder here
+const REEL_PHOTOS = [
+    { src: 'images/first_photo.jpeg', caption: 'This one is first photo ,cool girl 💖' },
+    { src: 'images/linkedin.jpeg', caption: 'Kuchh yaad aaya 🌸,meri ai user' },
+    { src: 'images/baby_photo.jpeg', caption: 'Isliye moti karna chahta hu 😍' },
+    { src: 'images/bumble.jpeg', caption: 'bumble ki photo meri bubbu ki 🥰' },
+    { src: 'images/stand_up.jpeg', caption: 'Stand up comedy wo bhi free me 😂' },
+    { src: 'images/kaungora.jpeg', caption: 'Kaun gora ,kaun kaal , guess place 😂' },
+    { src: 'images/sundari.jpeg', caption: 'Sundari 😘' },
+    { src: 'images/d1.jpg', caption: 'That smile I keep thinking about you 💖' },
+    { src: 'images/d3.jpg', caption: 'My favorite person, always 🌸' },
+    { src: 'images/tera_ladka.jpeg', caption: 'Jab app kush rahti hai to aap ka ladka 🌸' },
+];
+
  // Reasons database
  const reasons = [
     { 
@@ -160,3 +174,48 @@ if (cursor && canHover) {
 
 // Create initial floating elements
 setInterval(createFloatingElement, 2000);
+
+function initPhotoReel() {
+    const track = document.getElementById('reel-track');
+    const progressEl = document.getElementById('reel-progress');
+    if (!track || !REEL_PHOTOS.length) return;
+
+    track.innerHTML = '';
+    if (progressEl) progressEl.innerHTML = '';
+
+    REEL_PHOTOS.forEach((photo, i) => {
+        const slide = document.createElement('article');
+        slide.className = 'reel-slide';
+        slide.innerHTML = `
+            <img src="${photo.src}" alt="${photo.caption || 'A memory'}" class="reel-photo">
+            <div class="reel-caption">
+                <span class="reel-count">${i + 1} / ${REEL_PHOTOS.length}</span>
+                <p>${photo.caption || ''}</p>
+            </div>
+        `;
+        track.appendChild(slide);
+
+        if (progressEl) {
+            const bar = document.createElement('span');
+            bar.className = 'reel-bar' + (i === 0 ? ' active' : '');
+            progressEl.appendChild(bar);
+        }
+    });
+
+    const updateActive = () => {
+        const slides = track.querySelectorAll('.reel-slide');
+        const bars = progressEl ? progressEl.querySelectorAll('.reel-bar') : [];
+        const mid = track.getBoundingClientRect().top + track.clientHeight / 2;
+        let active = 0;
+        slides.forEach((slide, i) => {
+            const rect = slide.getBoundingClientRect();
+            if (rect.top <= mid && rect.bottom >= mid) active = i;
+        });
+        bars.forEach((bar, i) => bar.classList.toggle('active', i === active));
+    };
+
+    track.addEventListener('scroll', updateActive, { passive: true });
+    updateActive();
+}
+
+initPhotoReel();
